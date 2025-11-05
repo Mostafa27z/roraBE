@@ -14,6 +14,7 @@ class ProductImage extends Model
         'product_id',
         'image_url',
         'is_main',
+        'public_id'
     ];
 
     public function product()

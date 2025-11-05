@@ -6,18 +6,27 @@ use Modules\Products\Http\Controllers\CategoryController;
 
 Route::prefix('products')->group(function () {
 
-    // Public routes
+    // 🟢 Public routes (fixed paths first)
     Route::get('active', [ProductsController::class, 'active']);
     Route::get('categories/active', [CategoryController::class, 'active']);
 
-   
-    Route::get('{product}', [ProductsController::class, 'show']);
-
-    //  Admin-only routes
-    Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
-        Route::apiResource('categories', CategoryController::class)->except(['create', 'edit']);
-        Route::apiResource('/', ProductsController::class)
-            ->parameters(['' => 'product'])
-            ->except(['create', 'edit', 'show']); // exclude show since it's public
+    // 🔒 Admin-only routes for categories
+    Route::middleware(['auth:sanctum', 'role:admin'])->prefix('categories')->group(function () {
+        Route::get('/', [CategoryController::class, 'index']);
+        Route::post('/', [CategoryController::class, 'store']);
+        Route::get('{category}', [CategoryController::class, 'show']);
+        Route::put('{category}', [CategoryController::class, 'update']);
+        Route::delete('{category}', [CategoryController::class, 'destroy']);
     });
+
+    // 🔒 Admin-only routes for products
+    Route::middleware(['auth:sanctum', 'role:admin'])->group(function () {
+        Route::get('/', [ProductsController::class, 'index']);
+        Route::post('/', [ProductsController::class, 'store']);
+        Route::put('{product}', [ProductsController::class, 'update']);
+        Route::delete('{product}', [ProductsController::class, 'destroy']);
+    });
+
+    // 🟡 Dynamic route last (public product detail)
+    Route::get('{product}', [ProductsController::class, 'show']);
 });
